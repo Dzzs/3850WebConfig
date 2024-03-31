@@ -1,4 +1,4 @@
 pandas
 netmiko
-dotenv
+python-dotenv
 streamlit
