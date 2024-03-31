@@ -52,7 +52,7 @@ def VlanConfig():
     print("Setting Vlan")
     if int(port) <= int(st.session_state.giports):
         interface = "interface Gi1/0/"+str(port)
-    elif int(port) >= int(st.session_state.teports):
+    elif int(port) > int(st.session_state.giports):
         interface = "interface Te1/0/"+str(port)
 
     vlanCommands = [interface,
@@ -68,7 +68,7 @@ def TrunkConfig():
     print("Setting Trunk")
     if int(port) <= int(st.session_state.giports):
         interface = "interface Gi1/0/"+str(port)
-    elif int(port) >= int(st.session_state.teports):
+    elif int(port) > int(st.session_state.giports):
         interface = "interface Te1/0/"+str(port)
 
     trunkCommands = [interface,
@@ -83,7 +83,7 @@ def NameConfig():
     print("Setting Name")
     if int(port) <= int(st.session_state.giports):
         interface = "interface Gi1/0/"+str(port)
-    elif int(port) >= int(st.session_state.teports):
+    elif int(port) > int(st.session_state.giports):
         interface = "interface Te1/0/"+str(port)
 
     trunkCommands = [interface,
