@@ -1,4 +1,4 @@
-name: 3850WebConfig
+name: 3850webconfig
 
 on:
   push:
@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag 3850WebConfig:$(date +%s)
+      run: docker build . --file Dockerfile --tag 3850webconfig:$(date +%s)
