@@ -13,7 +13,7 @@ Before clicking 'Run', thoroughly review the information above the button. Incor
 The machine running the container must have password-based SSH access to your switch.
 
 ## Docker Compose
-Tested on AMD64 and Raspberry Pi 4.
+Tested on AMD64 and ARM64 (Raspberry Pi 4).
 ```
 services:
   3850webconfig:
