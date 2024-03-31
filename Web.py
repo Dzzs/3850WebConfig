@@ -16,8 +16,10 @@ if "statusData" not in st.session_state:
 if "outputMsg" not in st.session_state:
     st.session_state.outputMsg = ''
 
+#################################
+# NetMiko / Switch interaction
+
 def ConnectToSwitch():
-    print("Connecting")
     load_dotenv()
     cisco_3850 = {
     'device_type': 'cisco_ios',
@@ -26,11 +28,13 @@ def ConnectToSwitch():
     'password': os.getenv("password"),
     'port' : 22
     } 
-    st.session_state.isConnected = True
-    st.session_state.net_connect = ConnectHandler(**cisco_3850)    
-
+    if st.session_state.isConnected == False:
+        print("Connecting")
+        st.session_state.net_connect = ConnectHandler(**cisco_3850)
+        st.session_state.isConnected = True
+        
 def VlanConfig():
-
+    print("Setting Vlan")
     if int(port) <= 36:
         interface = "interface Gi1/0/"+str(port)
     elif int(port) >= 37:
@@ -43,9 +47,10 @@ def VlanConfig():
     output = st.session_state.net_connect.send_config_set(vlanCommands)
     global outputMsg 
     st.session_state.outputMsg = output
+    print(st.session_state.outputMsg)
 
-def TrunkConfig(port = int):
-
+def TrunkConfig():
+    print("Setting Trunk")
     if int(port) <= 36:
         interface = "interface Gi1/0/"+str(port)
     elif int(port) >= 37:
@@ -57,9 +62,10 @@ def TrunkConfig(port = int):
     output = st.session_state.net_connect.send_config_set(trunkCommands)
     global outputMsg 
     st.session_state.outputMsg = output
+    print(st.session_state.outputMsg)
 
 def NameConfig():
-
+    print("Setting Name")
     if int(port) <= 36:
         interface = "interface Gi1/0/"+str(port)
     elif int(port) >= 37:
@@ -70,6 +76,7 @@ def NameConfig():
     output = st.session_state.net_connect.send_config_set(trunkCommands)
     global outputMsg 
     st.session_state.outputMsg = output
+    print(st.session_state.outputMsg)
 
 def GetStatus():
     print("Getting Status")
@@ -78,8 +85,17 @@ def GetStatus():
     st.session_state.outputMsg = output
     StatusDisplay(st.session_state.outputMsg)
 
-#################################
+def WriteConfig():
+    print("Writing Config")
+    output = st.session_state.net_connect.send_command('wr')
+    global outputMsg 
+    st.session_state.outputMsg = output
+    StatusDisplay(st.session_state.outputMsg)
 
+# End of NetMiko / Switch interaction
+#################################
+# Pandas DataFrame and Status parsing
+    
 @st.cache_data
 def StatusDisplay(rawData = ""):
 
@@ -88,25 +104,36 @@ def StatusDisplay(rawData = ""):
 
     lines = rawData.splitlines()
 
+    #ChatGPT generated RegEx
     pattern = r'(\w+\d\/\d\/\d+)\s+(.+?)\s+(.+?)\s+(1|2|3|4|trunk)\s+(?:\w+\s)?(?:\w+\s)?' 
     
     processedData = []
 
+    #[:49] to only show the primary 48 ports
     for line in lines[:49]:
         match = re.match(pattern, line)
         if match:
             processedData.append(match.groups())
-        #else:  # Line doesn't match
-            #print("Non-matching line:", line)
 
     st.session_state.statusData = pd.DataFrame(processedData, 
                     columns=['Port', 'Name', 'Status', 'Vlan'])
 
+# End of Pandas DataFrame and Status parsing
 ##################################
+# StreamLit Web interface
+    
+#Resize buttons by fitting to columns
+b1, b2, b3, b4, b5, b6, b7, b8, b9, b10 = st.columns(10)
 
-if st.button("Connect"):
-    ConnectToSwitch()
-    isConnected = True
+with b1:
+    if st.button("Connect",use_container_width=True):
+        ConnectToSwitch()
+        isConnected = True
+with b2:
+    if st.button("Write Config",use_container_width=True):
+        if st.session_state.isConnected == True:
+            WriteConfig()
+
 
 portName = st.text_input(label="Name")
 
@@ -125,19 +152,21 @@ port = st.radio('Switch Port',
 
 st.text("Task: " +str(task) + "\nVLAN: " + str(vlan) + "\nPort: " + str(port))
 
-
+#Resize buttons by fitting to columns
 c1, c2, c3, c4, c5, c6, c7, c8, c9, c10 = st.columns(10)
 
 with c1:    
     if st.button("Run",use_container_width=True):
-        if task is not None:
-            if port is not None:
-                if task == "Trunk":
-                    TrunkConfig()
-                if task == "Name":
-                    NameConfig()
-                if vlan is not None:
-                    VlanConfig()
+        if st.session_state.isConnected == True:
+            if task is not None:
+                if port is not None:
+                    if task == "Trunk":
+                        TrunkConfig()
+                    if task == "Name":
+                        NameConfig()
+                    if vlan is not None:
+                        if task == "Vlan":
+                            VlanConfig()
 
 with c2:
     if st.button("Get Status",use_container_width=True):
@@ -145,4 +174,8 @@ with c2:
             GetStatus()
 
 st.dataframe(st.session_state.statusData, hide_index=True, use_container_width=True)
-#st.text(st.session_state.outputMsg)
+
+st.text("Switch Output:\n" + st.session_state.outputMsg)
+
+# End of StreamLit Web interface
+##################################
