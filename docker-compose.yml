@@ -1,0 +1,14 @@
+services:
+  3850webconfig:
+    image: ghcr.io/dzzs/3850webconfig:main
+    container_name: 3850webconfig
+    environment:
+      - host=192.168.1.1 #Enter switch's IP
+      - username=SSHUsername #Username used to SSH into the switch
+      - password=SSHPassword #Password used to SSH into the switch
+      - giports=36 #Number of GI ports
+      - teports=12 #Number of TE ports
+      - PYTHONUNBUFFERED=1 #Optional for some logging to docker console
+    ports:
+      - 8080:8501  
+    restart: unless-stopped

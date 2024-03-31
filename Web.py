@@ -4,8 +4,10 @@ from dotenv import load_dotenv
 import os
 import pandas as pd
 import re
+from time import sleep
 
 st.set_page_config(layout='wide')
+
 
 if "isConnected" not in st.session_state:
     st.session_state.isConnected = False
@@ -15,6 +17,15 @@ if "statusData" not in st.session_state:
 
 if "outputMsg" not in st.session_state:
     st.session_state.outputMsg = ''
+
+if "giports" not in st.session_state:
+    load_dotenv()
+    st.session_state.giports = os.getenv("giports")
+
+if "teports" not in st.session_state:
+    load_dotenv()
+    st.session_state.teports = int(st.session_state.giports) + int(os.getenv("teports"))
+
 
 #################################
 # NetMiko / Switch interaction
@@ -30,14 +41,18 @@ def ConnectToSwitch():
     } 
     if st.session_state.isConnected == False:
         print("Connecting")
-        st.session_state.net_connect = ConnectHandler(**cisco_3850)
-        st.session_state.isConnected = True
+        with st.spinner(text="Connecting.."):
+            sleep(1)
+            st.session_state.net_connect = ConnectHandler(**cisco_3850)
+            st.session_state.isConnected = True
+            st.success('Connected')
+            GetStatus()
         
 def VlanConfig():
     print("Setting Vlan")
-    if int(port) <= 36:
+    if int(port) <= int(st.session_state.giports):
         interface = "interface Gi1/0/"+str(port)
-    elif int(port) >= 37:
+    elif int(port) >= int(st.session_state.teports):
         interface = "interface Te1/0/"+str(port)
 
     vlanCommands = [interface,
@@ -51,9 +66,9 @@ def VlanConfig():
 
 def TrunkConfig():
     print("Setting Trunk")
-    if int(port) <= 36:
+    if int(port) <= int(st.session_state.giports):
         interface = "interface Gi1/0/"+str(port)
-    elif int(port) >= 37:
+    elif int(port) >= int(st.session_state.teports):
         interface = "interface Te1/0/"+str(port)
 
     trunkCommands = [interface,
@@ -66,9 +81,9 @@ def TrunkConfig():
 
 def NameConfig():
     print("Setting Name")
-    if int(port) <= 36:
+    if int(port) <= int(st.session_state.giports):
         interface = "interface Gi1/0/"+str(port)
-    elif int(port) >= 37:
+    elif int(port) >= int(st.session_state.teports):
         interface = "interface Te1/0/"+str(port)
 
     trunkCommands = [interface,
@@ -84,6 +99,7 @@ def GetStatus():
     global outputMsg 
     st.session_state.outputMsg = output
     StatusDisplay(st.session_state.outputMsg)
+    st.toast("Status Updated")
 
 def WriteConfig():
     print("Writing Config")
@@ -160,18 +176,32 @@ with c1:
         if st.session_state.isConnected == True:
             if task is not None:
                 if port is not None:
+                    value = st.session_state.statusData.at[port-1, "Name"]
+                    if value == "Router" and task != "Name":
+                        st.warning(f"That port is named {value}. If you really want to modify it, change its name temporarily.")
+                        print("Blocked config of " + value)
                     if task == "Trunk":
-                        TrunkConfig()
+                        with st.spinner(text="Running.."):
+                            TrunkConfig()
+                            st.toast("Done")
+                            GetStatus()
                     if task == "Name":
-                        NameConfig()
+                        with st.spinner(text="Running.."):
+                            NameConfig()
+                            st.toast("Done")
+                            GetStatus()
                     if vlan is not None:
                         if task == "Vlan":
-                            VlanConfig()
-
+                            with st.spinner(text="Running.."):
+                                VlanConfig()
+                                st.toast("Done")
+                                GetStatus()
 with c2:
     if st.button("Get Status",use_container_width=True):
         if st.session_state.isConnected == True:
-            GetStatus()
+            with st.spinner(text="Running.."):
+                GetStatus()
+                
 
 st.dataframe(st.session_state.statusData, hide_index=True, use_container_width=True)
 
