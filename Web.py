@@ -96,7 +96,7 @@ def WriteConfig():
 #################################
 # Pandas DataFrame and Status parsing
     
-@st.cache_data
+
 def StatusDisplay(rawData = ""):
 
     if rawData.startswith('\n'):
