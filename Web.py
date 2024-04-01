@@ -47,15 +47,16 @@ def ConnectToSwitch():
             st.session_state.isConnected = True
             st.success('Connected')
             GetStatus()
-        
+
+def PortName():
+    if int(port) <= int(st.session_state.giports):
+        return "interface Gi1/0/"+str(port)
+    elif int(port) > int(st.session_state.giports):
+        return "interface Te1/0/"+str(port)
+
 def VlanConfig():
     print("Setting Vlan")
-    if int(port) <= int(st.session_state.giports):
-        interface = "interface Gi1/0/"+str(port)
-    elif int(port) >= int(st.session_state.teports):
-        interface = "interface Te1/0/"+str(port)
-
-    vlanCommands = [interface,
+    vlanCommands = [PortName(),
                     'switchport mode access',
                     'switchport access vlan ' + str(vlan)]
 
@@ -66,12 +67,7 @@ def VlanConfig():
 
 def TrunkConfig():
     print("Setting Trunk")
-    if int(port) <= int(st.session_state.giports):
-        interface = "interface Gi1/0/"+str(port)
-    elif int(port) >= int(st.session_state.teports):
-        interface = "interface Te1/0/"+str(port)
-
-    trunkCommands = [interface,
+    trunkCommands = [PortName(),
                      'switchport mode trunk']
 
     output = st.session_state.net_connect.send_config_set(trunkCommands)
@@ -81,12 +77,8 @@ def TrunkConfig():
 
 def NameConfig():
     print("Setting Name")
-    if int(port) <= int(st.session_state.giports):
-        interface = "interface Gi1/0/"+str(port)
-    elif int(port) >= int(st.session_state.teports):
-        interface = "interface Te1/0/"+str(port)
 
-    trunkCommands = [interface,
+    trunkCommands = [PortName(),
                      'description ' + portName]
     output = st.session_state.net_connect.send_config_set(trunkCommands)
     global outputMsg 
@@ -112,7 +104,6 @@ def WriteConfig():
 #################################
 # Pandas DataFrame and Status parsing
     
-
 def StatusDisplay(rawData = ""):
 
     if rawData.startswith('\n'):
@@ -146,9 +137,8 @@ with b1:
         ConnectToSwitch()
         isConnected = True
 with b2:
-    if st.button("Write Config",use_container_width=True):
-        if st.session_state.isConnected == True:
-            WriteConfig()
+    if st.button("Write Config",use_container_width=True) and st.session_state.isConnected == True:
+        WriteConfig()
 
 
 portName = st.text_input(label="Name")
@@ -171,36 +161,47 @@ st.text("Task: " +str(task) + "\nVLAN: " + str(vlan) + "\nPort: " + str(port))
 #Resize buttons by fitting to columns
 c1, c2, c3, c4, c5, c6, c7, c8, c9, c10 = st.columns(10)
 
+def RunCheck():
+    return all((
+        st.session_state.isConnected,
+        task != None,
+        port != None
+    ))
+
+def SafetyCheck():
+    value = st.session_state.statusData.at[port-1, "Name"]
+    if value == "Router" and task != "Name":
+        st.warning(f"That port is named {value}. If you really want to modify it, change its name temporarily.")
+        print("Blocked config of " + value)
+        return False
+    else:
+        return True
+
 with c1:    
-    if st.button("Run",use_container_width=True):
-        if st.session_state.isConnected == True:
-            if task is not None:
-                if port is not None:
-                    value = st.session_state.statusData.at[port-1, "Name"]
-                    if value == "Router" and task != "Name":
-                        st.warning(f"That port is named {value}. If you really want to modify it, change its name temporarily.")
-                        print("Blocked config of " + value)
-                    if task == "Trunk":
-                        with st.spinner(text="Running.."):
-                            TrunkConfig()
-                            st.toast("Done")
-                            GetStatus()
-                    if task == "Name":
-                        with st.spinner(text="Running.."):
-                            NameConfig()
-                            st.toast("Done")
-                            GetStatus()
-                    if vlan is not None:
-                        if task == "Vlan":
-                            with st.spinner(text="Running.."):
-                                VlanConfig()
-                                st.toast("Done")
-                                GetStatus()
-with c2:
-    if st.button("Get Status",use_container_width=True):
-        if st.session_state.isConnected == True:
+    if st.button("Run",use_container_width=True) and RunCheck() and SafetyCheck():
+
+        if task == "Trunk":
             with st.spinner(text="Running.."):
+                TrunkConfig()
+                st.toast("Done")
                 GetStatus()
+
+        if task == "Name":
+            with st.spinner(text="Running.."):
+                NameConfig()
+                st.toast("Done")
+                GetStatus()
+
+        if vlan != None and task == "Vlan":
+            with st.spinner(text="Running.."):
+                VlanConfig()
+                st.toast("Done")
+                GetStatus()
+
+with c2:
+    if st.button("Get Status",use_container_width=True) and st.session_state.isConnected == True:
+        with st.spinner(text="Running.."):
+            GetStatus()
                 
 
 st.dataframe(st.session_state.statusData, hide_index=True, use_container_width=True)
