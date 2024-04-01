@@ -1,12 +1,13 @@
 # 3850WebConfig
 
-This tool allows you to effortlessly control your 3850 switch configuration directly from a web browser. Key features include:
+This tool allows you to effortlessly control your 3850 switch configuration directly from a web browser. 
 
+Key features include:
 Modify Switchport Settings: Easily change switchport names (descriptions), assign VLANs, and configure trunk status.
 Comprehensive Port View: Get a status overview of all 48 ports.
 Direct Configuration Updates: Write and apply configuration changes instantly.
-Important:
 
+Important:
 Before clicking 'Run', thoroughly review the information above the button. Incorrect changes can disrupt network connectivity.
 
 ### Prerequisite
