@@ -69,7 +69,6 @@ def TrunkConfig():
     print("Setting Trunk")
     trunkCommands = [PortName(),
                      'switchport mode trunk']
-
     output = st.session_state.net_connect.send_config_set(trunkCommands)
     global outputMsg 
     st.session_state.outputMsg = output
