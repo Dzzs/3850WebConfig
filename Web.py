@@ -59,7 +59,6 @@ def VlanConfig():
     vlanCommands = [PortName(),
                     'switchport mode access',
                     'switchport access vlan ' + str(vlan)]
-
     output = st.session_state.net_connect.send_config_set(vlanCommands)
     global outputMsg 
     st.session_state.outputMsg = output
@@ -76,7 +75,6 @@ def TrunkConfig():
 
 def NameConfig():
     print("Setting Name")
-
     trunkCommands = [PortName(),
                      'description ' + portName]
     output = st.session_state.net_connect.send_config_set(trunkCommands)
@@ -202,7 +200,6 @@ with c2:
         with st.spinner(text="Running.."):
             GetStatus()
                 
-
 st.dataframe(st.session_state.statusData, hide_index=True, use_container_width=True)
 
 st.text("Switch Output:\n" + st.session_state.outputMsg)
