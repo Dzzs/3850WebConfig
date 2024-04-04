@@ -8,26 +8,15 @@ from time import sleep
 
 st.set_page_config(layout='wide')
 
-if "isConnected" not in st.session_state:
-    st.session_state.isConnected = False
-
-if "statusData" not in st.session_state:
-    st.session_state.statusData = pd.DataFrame()
-
-if "outputMsg" not in st.session_state:
-    st.session_state.outputMsg = ''
-
-if "outputStatus" not in st.session_state:
-    st.session_state.outputStatus = ''
-
-if "giports" not in st.session_state:
+def LoadGiports():
     load_dotenv()
-    st.session_state.giports = os.getenv("giports")
+    return os.getenv("giports")
 
-# Not used currently
-#if "teports" not in st.session_state:
-#    load_dotenv()
-#    st.session_state.teports = int(st.session_state.giports) + int(os.getenv("teports"))
+st.session_state.setdefault("isConnected", False)
+st.session_state.setdefault("statusData", pd.DataFrame())
+st.session_state.setdefault("outputMsg", '')
+st.session_state.setdefault("outputStatus", '')
+st.session_state.setdefault("giports", LoadGiports())
 
 #################################
 # NetMiko / Switch interaction
@@ -50,6 +39,7 @@ def ConnectToSwitch():
             GetStatus()
 
 def DisconnectFromSwitch():
+    print("Disconnecting")
     st.session_state.net_connect.disconnect()
     st.session_state.isConnected = False
 
@@ -191,30 +181,14 @@ try:
 except:
     print("Selections not loaded yet.")
 
-def RunCheck():
-    return all((
-        st.session_state.isConnected,
-        task != None,
-        port != None
-    ))
-
-def SafetyCheck():
-    value = st.session_state.statusData.at[port-1, "Name"]
-    if value == "Router" and task != "Name":
-        st.warning(f"That port is named {value}. If you really want to modify it, change its name temporarily.")
-        print("Blocked config of " + value)
-        return False
-    else:
-        return True
-
 #Resize buttons by fitting to columns
 c1, c2, c3 = st.columns([1,1,3])
 
 def RunCheck():
     return all((
         st.session_state.isConnected,
-        task != None,
-        port != None
+        task is not None,
+        port is not None
     ))
 
 def SafetyCheck():
@@ -242,7 +216,7 @@ with c1:
                     st.toast("Done")
                     GetStatus()
 
-            if vlan != None and task == "Vlan":
+            if vlan is not None and task == "Vlan":
                 with st.spinner(text="Running.."):
                     VlanConfig()
                     st.toast("Done")
@@ -258,21 +232,7 @@ with c2:
     if st.button("Get Status",use_container_width=True) and st.session_state.isConnected == True:
         with st.spinner(text="Running.."):
             GetStatus()
-                
-st.divider()
-
-
-        if vlan != None and task == "Vlan":
-            with st.spinner(text="Running.."):
-                VlanConfig()
-                st.toast("Done")
-                GetStatus()
-
-with c2:
-    if st.button("Get Status",use_container_width=True) and st.session_state.isConnected == True:
-        with st.spinner(text="Running.."):
-            GetStatus()
-                
+                       
 st.dataframe(st.session_state.statusData, hide_index=True, use_container_width=True)
 
 st.divider()
