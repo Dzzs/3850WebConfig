@@ -258,21 +258,7 @@ with c2:
     if st.button("Get Status",use_container_width=True) and st.session_state.isConnected == True:
         with st.spinner(text="Running.."):
             GetStatus()
-                
-st.divider()
-
-
-        if vlan != None and task == "Vlan":
-            with st.spinner(text="Running.."):
-                VlanConfig()
-                st.toast("Done")
-                GetStatus()
-
-with c2:
-    if st.button("Get Status",use_container_width=True) and st.session_state.isConnected == True:
-        with st.spinner(text="Running.."):
-            GetStatus()
-                
+                       
 st.dataframe(st.session_state.statusData, hide_index=True, use_container_width=True)
 
 st.divider()
