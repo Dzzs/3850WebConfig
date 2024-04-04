@@ -64,7 +64,6 @@ def VlanConfig():
     vlanCommands = [PortName(),
                     'switchport mode access',
                     'switchport access vlan ' + str(vlan)]
-
     output = st.session_state.net_connect.send_config_set(vlanCommands)
     global outputMsg 
     st.session_state.outputMsg = output
@@ -211,8 +210,25 @@ def SafetyCheck():
 #Resize buttons by fitting to columns
 c1, c2, c3 = st.columns([1,1,3])
 
+def RunCheck():
+    return all((
+        st.session_state.isConnected,
+        task != None,
+        port != None
+    ))
+
+def SafetyCheck():
+    value = st.session_state.statusData.at[port-1, "Name"]
+    if value == "Router" and task != "Name":
+        st.warning(f"That port is named {value}. If you really want to modify it, change its name temporarily.")
+        print("Blocked config of " + value)
+        return False
+    else:
+        return True
+
 with c1:    
     if st.button("Run",use_container_width=True) and RunCheck() and SafetyCheck():
+      
         try:
             if task == "Trunk":
                 with st.spinner(text="Running.."):
@@ -245,6 +261,18 @@ with c2:
                 
 st.divider()
 
+
+        if vlan != None and task == "Vlan":
+            with st.spinner(text="Running.."):
+                VlanConfig()
+                st.toast("Done")
+                GetStatus()
+
+with c2:
+    if st.button("Get Status",use_container_width=True) and st.session_state.isConnected == True:
+        with st.spinner(text="Running.."):
+            GetStatus()
+                
 st.dataframe(st.session_state.statusData, hide_index=True, use_container_width=True)
 
 st.divider()
