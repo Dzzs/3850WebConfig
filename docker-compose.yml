@@ -7,7 +7,6 @@ services:
       - username=SSHUsername #Username used to SSH into the switch
       - password=SSHPassword #Password used to SSH into the switch
       - giports=36 #Number of GI ports
-    #  - teports=12 #Number of TE ports not used currently
       - PYTHONUNBUFFERED=1 #Optional for some logging to docker console
     ports:
       - 8080:8501  
