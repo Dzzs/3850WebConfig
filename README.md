@@ -32,7 +32,7 @@ services:
 ```
 
 ## Usage
-- Click the 'Connect' button and wait for the animation in the top right to finish.
+- Click the 'Connect' button.
 - Select the appropriate 'Task' option.
 - Complete any required fields or, if you are changing a name, enter the new name.
 - Status updates with most actions, but you can click 'Get Status' any time to update the information table as well.
