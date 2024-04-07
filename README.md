@@ -25,7 +25,6 @@ services:
       - username=SSHUsername #Username used to SSH into the switch
       - password=SSHPassword #Password used to SSH into the switch
       - giports=36 #Number of GI ports
-      - teports=12 #Number of TE ports
       - PYTHONUNBUFFERED=1 #Optional for some logging to docker console
     ports:
       - 8080:8501  
@@ -39,11 +38,11 @@ services:
 - Status updates with most actions, but you can click 'Get Status' any time to update the information table as well.
 
 ### Landing Page
-![image](https://github.com/Dzzs/3850WebConfig/assets/11656216/9fa70bea-0082-4001-a36a-461c491197c2)
+![image](https://github.com/Dzzs/3850WebConfig/assets/11656216/64253cb2-8261-4a43-90f7-4edb74726553)
 
 ### In Use
-Update the table by clicking Get Status.
-![image](https://github.com/Dzzs/3850WebConfig/assets/11656216/2b5e4516-2f5c-4371-bf1d-8f007bf047ee)
+![image](https://github.com/Dzzs/3850WebConfig/assets/11656216/905c3f99-515e-4572-9c50-696cbb55b538)
+
 
 
 Intentionally avoiding using *that* popular switch manufacturer's name (you know the one...it starts with a C)
