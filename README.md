@@ -43,10 +43,5 @@ services:
 ### In Use
 ![image](https://github.com/Dzzs/3850WebConfig/assets/11656216/905c3f99-515e-4572-9c50-696cbb55b538)
 
-
-
-Intentionally avoiding using *that* popular switch manufacturer's name (you know the one...it starts with a C)
-
-
 # Disclaimer
 While this tool is designed to be helpful, I cannot be held responsible for any network issues that may arise from its use. Please use it with caution and understand that it is not intended for production environments.
