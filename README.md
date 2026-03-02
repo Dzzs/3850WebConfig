@@ -6,6 +6,7 @@ Key features include:
 Modify Switchport Settings: Easily change switchport names (descriptions), assign VLANs, and configure trunk status.
 Comprehensive Port View: Get a status overview of all 48 ports.
 Direct Configuration Updates: Write and apply configuration changes instantly.
+No AI used in this project.
 
 Important:
 Before clicking 'Run', thoroughly review the information above the button. Incorrect changes can disrupt network connectivity.
